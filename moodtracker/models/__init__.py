@@ -5,8 +5,10 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from . import moods
+from . import users
 
 from .moods import *
+from .users import *
 
 connect_args = {}
 
