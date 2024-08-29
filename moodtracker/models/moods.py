@@ -1,3 +1,6 @@
+import datetime
+import pydantic
+
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
 from sqlmodel import Field, SQLModel, create_engine, Session, select, Relationship
@@ -5,10 +8,9 @@ from sqlmodel import Field, SQLModel, create_engine, Session, select, Relationsh
 
 class BaseMood(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    name: str
     description: str | None = None
-    mood_type: str
-    location: str
+    mood_type: int
+    location: str | None = None
     user_id: int | None = 0
 
 
@@ -21,13 +23,17 @@ class UpdatedMood(BaseMood):
 
 
 class Mood(BaseMood):
-    id: int
+    mood_date: datetime.datetime | None = pydantic.Field(
+        json_schema_extra=dict(example="2023-01-01T00:00:00.000000"),
+        default=None
+    )
 
 
 class DBMood(Mood, SQLModel, table=True):
     __tablename = "mood"
     id: Optional[int] = Field(default=None, primary_key=True)
     # user_id: int = Field(default=None, foreign_key="users.id")
+    mood_date: datetime.datetime = Field(default_factory=datetime.datetime.now)
 
 
 class MoodList(BaseModel):
