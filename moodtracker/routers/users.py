@@ -17,26 +17,25 @@ async def get_me(
     return current_user
 
 
-@router.get("/{user_id}")
-async def get(
-    user_id: str,
-    session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: models.User = Depends(deps.get_current_user),
-) -> models.User:
-
-    user = await session.get(models.DBUser, user_id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not found this user",
-        )
-    return user
+# @router.get("/{user_id}")
+# async def get(
+#     user_id: str,
+#     session: Annotated[AsyncSession, Depends(models.get_session)],
+# ) -> models.User:
+#     user = await session.get(models.DBUser, user_id)
+#     if not user:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="Not found this user",
+#         )
+#     return user
 
 
 @router.post("/create_account")
 async def create(
     user_info: models.RegisteredUser,
     session: Annotated[AsyncSession, Depends(models.get_session)],
+    current_user: models.User = Depends(deps.get_current_user),
 ) -> models.User:
 
     result = await session.exec(
@@ -86,7 +85,7 @@ async def change_password(
     await session.commit()
 
 
-@router.put("/{user_id}/update")
+@router.put("/{user_id}/update_data")
 async def update(
     user_id: str,
     user_update: models.UpdatedUser,
