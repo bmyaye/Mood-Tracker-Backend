@@ -6,7 +6,6 @@ from typing import Annotated
 from .. import deps
 from .. import models
 
-
 router = APIRouter(prefix="/users", tags=["users"])
 
 
@@ -34,29 +33,30 @@ async def get_me(
 @router.post("/create_account")
 async def create(
     user_info: models.RegisteredUser,
-    session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: models.User = Depends(deps.get_current_user),
-) -> models.User:
-
-    result = await session.exec(
+    session: Annotated[AsyncSession, Depends(models.get_session)]
+) -> models.DBUser:
+    # Check if username exists
+    result = await session.execute(
         select(models.DBUser).where(models.DBUser.username == user_info.username)
     )
-
-    user = result.one_or_none()
+    user = result.scalar_one_or_none()
+    
+    print("Attempting to create user with username:", user_info.username)  # Debug: Print username being checked
+    print("Existing user found:", user)  # Debug: Print existing user if found
 
     if user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="This username is exists.",
+            detail="This username already exists.",
         )
 
+    # Create new user
     user = models.DBUser.from_orm(user_info)
     await user.set_password(user_info.password)
     session.add(user)
     await session.commit()
 
     return user
-
 
 @router.put("/{user_id}/change_password")
 async def change_password(
@@ -65,29 +65,38 @@ async def change_password(
     session: Annotated[AsyncSession, Depends(models.get_session)],
     current_user: models.User = Depends(deps.get_current_user),
 ) -> dict:
-
+    # Get the user by user_id
     user = await session.get(models.DBUser, user_id)
 
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not found this user",
+            detail="User not found",
         )
 
+    # Debug: Print the stored hashed password and the provided password
+    print("Stored password hash:", user.hashed_password)  # Debugging: Print the stored hashed password
+    print("Current password:", password_update.current_password)  # Debugging: Print the current password from request
+    print("Password match:", user.verify_password(password_update.current_password))  # Debugging: Check if passwords match
+
+    # Verify the current password
     if not user.verify_password(password_update.current_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect password",
         )
 
+    # Set new password and save changes
     await user.set_password(password_update.new_password)
     session.add(user)
     await session.commit()
 
+    return {"msg": "Password updated successfully"}
+
 
 @router.put("/{user_id}/update_data")
 async def update(
-    user_id: str,
+    user_id: int,
     user_update: models.UpdatedUser,
     session: Annotated[AsyncSession, Depends(models.get_session)],
     current_user: models.User = Depends(deps.get_current_user),

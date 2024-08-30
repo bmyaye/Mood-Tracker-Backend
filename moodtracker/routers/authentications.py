@@ -4,6 +4,8 @@ from sqlmodel import select
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBasicCredentials, HTTPBearer, OAuth2PasswordRequestForm
+from sqlalchemy.ext.asyncio import AsyncSession
+
 
 from .. import models
 from .. import config
@@ -17,22 +19,19 @@ settings = config.get_settings()
 
 
 @router.post("/token")
-async def authentication(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    session: Annotated[models.AsyncSession, Depends(models.get_session)],
-) -> models.Token:
-
-    result = await session.exec(
-        select(models.DBUser).where(models.DBUser.username == form_data.username)
-    )
-
-    user = result.one_or_none()
-
+async def some_function(session, form_data):
+    user = None  # ตัวแปรนี้อาจถูกกำหนดก่อนหน้านี้
     if not user:
-        result = await session.exec(
+        result = await session.execute(
             select(models.DBUser).where(models.DBUser.email == form_data.username)
         )
-        user = result.one_or_none()
+        user = result.scalar_one_or_none()
+
+    # ดำเนินการต่อด้วยโค้ดส่วนที่เหลือของคุณ
+    if user:
+        # ประมวลผลข้อมูลของผู้ใช้
+        pass
+
 
     if not user:
         raise HTTPException(

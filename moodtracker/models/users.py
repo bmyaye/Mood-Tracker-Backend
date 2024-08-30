@@ -52,7 +52,7 @@ class ChangedPassword(BaseModel):
 
 class ResetedPassword(BaseModel):
     email: EmailStr
-    citizen_id: str
+    citizen_id: int
 
 
 class RegisteredUser(BaseUser):
