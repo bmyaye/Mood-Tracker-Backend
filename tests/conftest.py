@@ -26,6 +26,15 @@ SettingsTesting.model_config = SettingsConfigDict(
     env_file=".testing.env", validate_assignment=True, extra="allow"
 )
 
+"""
+
+create file .testing.env in the same level as moodtracker folder
+
+in file .testing.env
+SQLDB_URL=sqlite+aiosqlite:///./test-data/your_database_name.db
+
+"""
+
 
 @pytest.fixture(name="app", scope="session")
 def app_fixture():
