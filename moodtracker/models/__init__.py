@@ -1,33 +1,44 @@
-from typing import Optional
-from sqlmodel import Field, SQLModel, create_engine, Session, select
-from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlalchemy.ext.asyncio import create_async_engine
+from typing import AsyncIterator
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession as SQLAAsyncSession
 from sqlalchemy.orm import sessionmaker
+from sqlmodel import SQLModel
 
-from . import moods
-from . import users
+from sqlmodel import SQLModel, create_engine, select
+from sqlmodel.ext.asyncio.session import AsyncSession
+
 
 from .moods import *
 from .users import *
 
 connect_args = {}
-
 engine = None
 
 def init_db(settings):
     global engine
     engine = create_async_engine(
         settings.SQLDB_URL, 
-        echo = True, 
-        future = True,
-        connect_args = connect_args,
+        echo=True, 
+        future=True,
+        connect_args=connect_args,
     )
 
 async def create_all():
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 
-async def get_session() -> AsyncSession: # type: ignore
+async def recreate_table():
+
+    async with engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.drop_all)
+        await conn.run_sync(SQLModel.metadata.create_all)
+
+async def get_session() -> AsyncIterator[AsyncSession]: 
     async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with async_session() as session:
         yield session
+
+async def session_close():
+    global engine
+    if engine is None:
+        raise Exception("Engine is not initialized")
+    await engine.dispose()

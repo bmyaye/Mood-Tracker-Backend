@@ -1,17 +1,16 @@
 import datetime
 import pydantic
-
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, ConfigDict
-from sqlmodel import Field, SQLModel, create_engine, Session, select, Relationship
+from sqlmodel import Field, SQLModel
 
 
 class BaseMood(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    description: str | None = None
+    description: Optional[str] = None
     mood_type: int
-    location: str | None = None
-    user_id: int | None = 0
+    location: Optional[str] = None
+    user_id: Optional[int] = 0
 
 
 class CreatedMood(BaseMood):
@@ -23,22 +22,23 @@ class UpdatedMood(BaseMood):
 
 
 class Mood(BaseMood):
-    mood_date: datetime.datetime | None = pydantic.Field(
+    mood_date: Optional[datetime.datetime] = pydantic.Field(
         json_schema_extra=dict(example="2023-01-01T00:00:00.000000"),
         default=None
     )
 
 
 class DBMood(Mood, SQLModel, table=True):
-    __tablename = "mood"
+    __tablename__ = "mood"  # Corrected __tablename__ to include double underscores
     id: Optional[int] = Field(default=None, primary_key=True)
-    # user_id: int = Field(default=None, foreign_key="users.id")
     mood_date: datetime.datetime = Field(default_factory=datetime.datetime.now)
+
 
 
 class MoodList(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    moods: list[Mood]
+    moods: List[Mood]
     page: int
+    page_size: int
     page_count: int
     size_per_page: int
