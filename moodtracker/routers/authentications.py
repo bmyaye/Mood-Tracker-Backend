@@ -12,7 +12,7 @@ from .. import config
 from .. import security
 
 
-router = APIRouter(prefix="/authentications", tags=["authentications"])
+router = APIRouter(tags=["authentications"])
 
 
 settings = config.get_settings()
