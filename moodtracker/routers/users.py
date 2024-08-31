@@ -8,35 +8,6 @@ from .. import models
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-<<<<<<< Updated upstream
-=======
-# Create User
-@router.post("/")
-async def create_user(
-    user: RegisteredUser,
-    session: AsyncSession = Depends(get_session)
-    )->  models.User:
-    query = select(DBUser).where(DBUser.username == user.username)
-    result = await session.execute(query)
-    existing_user = result.scalar_one_or_none()
-
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Username already exists")
-    
-    db_user = DBUser(**user.dict())
-    await db_user.set_password(user.password)  # Encrypt password before saving
-    session.add(db_user)
-    await session.commit()
-    await session.refresh(db_user)
-
-    # Create a Point for user
-
-
-
-    await session.commit()  # Commit the Point to generate the point_id
-
-    return db_user
->>>>>>> Stashed changes
 
 @router.get("/me")
 async def get_me(

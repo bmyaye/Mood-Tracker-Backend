@@ -9,12 +9,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from .. import models
 from .. import deps
 
-<<<<<<< Updated upstream
-
 router = APIRouter(prefix="/moods", tags=["moods"])
-=======
-router = APIRouter(prefix="/moods", tags=["Moods"])
->>>>>>> Stashed changes
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
