@@ -7,9 +7,8 @@ from sqlmodel import Field, SQLModel
 
 class BaseMood(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+    mood_type: str
     description: Optional[str] = None
-    mood_type: int
-    location: Optional[str] = None
     user_id: Optional[int] = 0
 
 

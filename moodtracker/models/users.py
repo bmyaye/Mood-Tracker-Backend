@@ -10,10 +10,10 @@ import bcrypt
 
 class BaseUser(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
-    email: str = pydantic.Field(json_schema_extra=dict(example="email@email.local"))
     username: str = pydantic.Field(json_schema_extra=dict(example="username"))
-    first_name: str = pydantic.Field(json_schema_extra=dict(example="Firstname"))
-    last_name: str = pydantic.Field(json_schema_extra=dict(example="Lastname"))
+    email: str = pydantic.Field(json_schema_extra=dict(example="email@email.local"))
+    # first_name: str = pydantic.Field(json_schema_extra=dict(example="Firstname"))
+    # last_name: str = pydantic.Field(json_schema_extra=dict(example="Lastname"))
 
 
 class User(BaseUser):
